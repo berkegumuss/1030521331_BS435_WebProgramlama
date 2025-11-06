@@ -1,35 +1,47 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+
+// Component'lerimizi import ediyoruz
+import StartScreen from './components/StartScreen';
+import GameScreen from './components/GameScreen';
+// (İleride Sonuç ekranı için: import ResultScreen from './components/ResultScreen';)
+
+import './App.css'; 
 
 function App() {
-  const [count, setCount] = useState(0)
+  
+  // 1. Benzersiz yapı: Component referansını state'te tutar
+  const [ActiveComponent, setActiveComponent] = useState(() => StartScreen);
 
+  // 2. Yeni ekleme: Hangi modun seçildiğini tutacak state.
+  const [selectedMode, setSelectedMode] = useState(null);
+
+  // 3. Güncellenen fonksiyon: Artık bu fonksiyon "modu" parametre olarak alıyor.
+  const handleModeSelect = (mode) => {
+    setSelectedMode(mode); // Hangi modun seçildiğini kaydeder
+    setActiveComponent(() => GameScreen); // Oyun ekranına geçer
+  };
+
+  // Oyunu yeniden başlatan fonksiyon (İleride ResultScreen için)
+  const showStartScreen = () => {
+    setSelectedMode(null); // Mod seçimini sıfırlar
+    setActiveComponent(() => StartScreen); // Başlangıç ekranına döner
+  };
+
+  // 4. Render (çizim):
+  // Aktif component'i (ActiveComponent) doğrudan bir etiket gibi çağırıyoruz.
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div className="App-container">
+      <ActiveComponent 
+        // Gerekli tüm fonksiyonları ve verileri props olarak tek seferde iletiyoruz.
+        // StartScreen 'onModeSelect'i kullanacak.
+        onModeSelect={handleModeSelect} 
+        
+        // GameScreen 'selectedMode'u ve 'onRestart'ı kullanacak.
+        selectedMode={selectedMode} 
+        onRestart={showStartScreen} 
+      />
+    </div>
+  );
+} 
 
-export default App
+export default App;
