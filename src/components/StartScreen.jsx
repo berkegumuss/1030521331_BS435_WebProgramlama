@@ -1,53 +1,99 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-// 1. App.jsx'ten gönderilen 'onModeSelect' fonksiyonunu props olarak alıyoruz
 function StartScreen({ onModeSelect }) {
+  // Kontrol state
+  // false = Bilgilendirme Ekranı, true = Mod Seçim Ekranı
+  const [showModes, setShowModes] = useState(false);
+
   return (
     <div className="start-container">
       <header className="game-header">
         <h1>AI Tarafından Üretilen Görseli Bulma Oyunu</h1>
       </header>
-      
-      <section className="rules-section">
-        <h2>ℹ️ Oyun Kuralları ve Amaç</h2>
-        <p>
-          Her turda size sunulacak 3 görselden <b>sadece biri</b> yapay zeka (AI) tarafından üretilmiştir diğer ikisi gerçektir.
-        </p>
-      </section>
 
-      {/* 2. MOD SEÇİM ALANI */}
-      <section className="mode-selection">
-        <h3>Lütfen Bir Oyun Modu Seçin:</h3>
-        
-        {/*
-          Buradaki 3 buton da .start-button sınıfını kullanıyor.
-          Her buton, 'onModeSelect' fonksiyonunu farklı bir mod adıyla çağırıyor.
-        */}
-        <div className="button-area">
-          <button 
-            className="start-button" 
-            onClick={() => onModeSelect('KLASIK')}
-          >
-            Klasik Mod (İpuculu)
-          </button>
+      {/* AŞAMA 1: Bilgilendirme ve Başla Butonu */}
+      {!showModes && (
+        <>
+          <section className="rules-section">
+            <h2>👋 Hoş Geldiniz !</h2>
+            <p>
+              Gelişen yapay zeka teknolojileri ile gerçek ve sanal arasındaki ayrım giderek azalıyor. 
+              Görsel algınızı test etmeye hazır mısınız ? Hazırsanız başlayalım !
+            </p>
+            
+            <h2 style={{marginTop: '20px'}}>ℹ️ Nasıl Oynanır ?</h2>
+            <p>
+              1. Her turda karşınıza <strong>3 farklı görsel</strong> çıkacak.
+            </p>
+            <p>
+              2. Bu görsellerden ikisi gerçek, <strong>biri ise AI (Yapay Zeka) üretimidir.</strong>
+            </p>
+            <p>
+              3. Amacınız AI tarafından üretilen görseli bulmaktır.
+            </p>
+            <p>
+              4. Oyunu 3 farklı modda oynayabilirsiniz.
+            </p>
+          </section>
+
+          <div className="button-area">
+  
+            <button 
+              className="start-button" 
+              onClick={() => setShowModes(true)}
+            >
+              OYUNA BAŞLA
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* AŞAMA 2: Mod Seçimi */}
+      {showModes && (
+        <section className="mode-selection">
+          <h3>Lütfen oynamak istediğiniz modu seçin:</h3>
           
-          <button 
-            className="start-button" 
-            onClick={() => onModeSelect('SURELI')}
+          <div className="button-area">
+            <button 
+              className="start-button" 
+              onClick={() => onModeSelect('KLASİK')}
+            >
+              Klasik Mod
+            </button>
+            
+            <button 
+              className="start-button" 
+              onClick={() => onModeSelect('SÜRELİ')}
+            >
+              Zamana Karşı
+            </button>
+            
+            <button 
+              className="start-button" 
+              onClick={() => onModeSelect('İPUCUSUZ')}
+            >
+              İpucusuz Zor Mod
+            </button>
+          </div>
+
+          {/* Geri Dönme Linki */}
+          <p 
+            style={{
+              marginTop: '25px', 
+              cursor: 'pointer', 
+              textDecoration: 'underline', 
+              fontSize: '0.9rem',
+              color: '#bdc3c7'
+            }}
+            onClick={() => setShowModes(false)}
           >
-            Zamana Karşı
-          </button>
-          
-          <button 
-            className="start-button" 
-            onClick={() => onModeSelect('IPUCUSUZ')}
-          >
-            Zor Mod (İpucusuz)
-          </button>
-        </div>
-      </section>
+            &lt; Kurallara Geri Dön
+          </p>
+        </section>
+      )}
     </div>
   );
 }
 
 export default StartScreen;
+

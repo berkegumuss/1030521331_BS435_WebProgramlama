@@ -53,7 +53,7 @@ function GameScreen({ selectedMode, onRestart }) {
           </h2>
         )}
         
-        <p>Tahmininizi yapın: Hangi görsel yapay zeka ürünü?</p>
+        <p>Tahmininizi yapın: Hangi görsel yapay zeka ürünü ?</p>
       </div>
       
       <div className="image-selection-area">
