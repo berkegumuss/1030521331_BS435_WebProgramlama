@@ -56,21 +56,21 @@ function StartScreen({ onModeSelect }) {
           <div className="button-area">
             <button 
               className="start-button" 
-              onClick={() => onModeSelect('KLASİK')}
+              onClick={() => onModeSelect('KLASIK')}
             >
               Klasik Mod
             </button>
             
             <button 
               className="start-button" 
-              onClick={() => onModeSelect('SÜRELİ')}
+              onClick={() => onModeSelect('SURELI')}
             >
               Zamana Karşı
             </button>
             
             <button 
               className="start-button" 
-              onClick={() => onModeSelect('İPUCUSUZ')}
+              onClick={() => onModeSelect('IPUCUSUZ')}
             >
               İpucusuz Zor Mod
             </button>
