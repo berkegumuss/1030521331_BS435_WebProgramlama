@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
-
-// Component'lerimizi import ediyoruz
 import StartScreen from './components/StartScreen';
 import GameScreen from './components/GameScreen';
-// (İleride Sonuç ekranı için: import ResultScreen from './components/ResultScreen';)
 
 import './App.css'; 
 
 function App() {
   
-  // 1. Benzersiz yapı: Component referansını state'te tutar
+  // 1. Component referansını state'te tutar
   const [ActiveComponent, setActiveComponent] = useState(() => StartScreen);
 
   // 2. Yeni ekleme: Hangi modun seçildiğini tutacak state.
@@ -28,7 +25,6 @@ function App() {
   };
 
   // 4. Render (çizim):
-  // Aktif component'i (ActiveComponent) doğrudan bir etiket gibi çağırıyoruz.
   return (
     <div className="App-container">
       <ActiveComponent 
