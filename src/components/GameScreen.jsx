@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { realImages, aiImages } from '../data';
 
+// GENEL İPUCU HAVUZU
 const HINTS = [
   "Resimdeki nesnelerin dokuları ve yüzeyleri doğal mı?",
   "Işık ve gölge yönleri mantıklı görünüyor mu?",
@@ -8,16 +9,15 @@ const HINTS = [
   "Resmin genelinde fizik kurallarına aykırı bir detay var mı?",
   "Renk geçişleri ve parlaklıklar göze doğal geliyor mu?",
   "Arka plandaki detaylar net mi yoksa birbirine mi geçmiş?",
-  "Nesnelerin birleşme noktalarında hata var mı?",
-  "Görseldeki ince detaylarda tutarsızlık var mı?"
+  "Nesnelerin birleşme noktalarında (eklem yerleri vb.) hata var mı?",
+  "Görseldeki ince detaylarda (çizgiler, desenler) tutarsızlık var mı?"
 ];
 
-function GameScreen({ selectedMode, onRestart }) {
+// onRoundFinish özelliği eklendi
+function GameScreen({ selectedMode, onRestart, onRoundFinish }) {
   
   const [timeLeft, setTimeLeft] = useState(15);
   const [currentImages, setCurrentImages] = useState([]);
-  
-  // Şu anki tur için seçilen rastgele ipucu
   const [currentHint, setCurrentHint] = useState("");
 
   const [feedback, setFeedback] = useState(null); 
@@ -25,8 +25,7 @@ function GameScreen({ selectedMode, onRestart }) {
   const [attempts, setAttempts] = useState(1); 
   const [eliminatedId, setEliminatedId] = useState(null); 
 
-
-  // 1. YENİ TUR BAŞLATMA
+  // 1. YENİ TUR HAZIRLIĞI
   const startNewRound = () => {
     setFeedback(null);
     setSelectedImageId(null);
@@ -35,12 +34,12 @@ function GameScreen({ selectedMode, onRestart }) {
 
     if (selectedMode === 'SURELI') setTimeLeft(15);
 
-    // Rastgele bir ipucu seçip hafızaya alır.
+    // Rastgele İpucu Seçer
     const randomHint = HINTS[Math.floor(Math.random() * HINTS.length)];
     setCurrentHint(randomHint);
 
+    // Rastgele Resimler Seçer
     const randomAI = aiImages[Math.floor(Math.random() * aiImages.length)];
-    
     const shuffledReal = [...realImages].sort(() => 0.5 - Math.random());
     const selectedReal = shuffledReal.slice(0, 2);
 
@@ -53,32 +52,36 @@ function GameScreen({ selectedMode, onRestart }) {
   }, []);
 
 
-  // 2. TIKLAMA VE İPUCU MANTIĞI
+  // 2. TIKLAMA MANTIĞI
   const handleImageClick = (image) => {
     if (feedback === 'correct' || feedback === 'wrong') return; 
     if (image.id === eliminatedId) return; 
 
     setSelectedImageId(image.id);
 
-    // --- DOĞRU CEVAP ---
+    // SENARYO A: DOĞRU CEVAP (AI)
     if (image.isAI) {
       setFeedback('correct');
-      setTimeout(() => startNewRound(), 1500);
+      setTimeout(() => {
+        // App.jsx'e haber verir: "Doğru bildi (+10 Puan)"
+        onRoundFinish(true); 
+        startNewRound();
+      }, 1500);
     } 
     
-    // --- YANLIŞ CEVAP ---
+    // SENARYO B: YANLIŞ CEVAP 
     else {
-      // İpucusuz mod veya 2. deneme -> Yanlış
+      // Eğer mod "İPUCUSUZ" ise veya zaten 2. denemeyse -> KAYBETTİN
       if (selectedMode === 'IPUCUSUZ' || attempts === 2) {
         setFeedback('wrong');
         setTimeout(() => {
-          setFeedback(null);
-          setSelectedImageId(null);
+          // App.jsx'e haber verir: "Bilemedi (0 Puan)"
+          onRoundFinish(false);
           startNewRound(); 
         }, 1500);
       } 
       
-      // Klasik/Süreli ve ilk deneme -> İpucu Gösterir.
+      // Eğer "KLASIK" veya "SURELI" ise ve ilk denememse -> İPUCU VER
       else {
         setFeedback('hint'); 
         setEliminatedId(image.id); 
@@ -91,19 +94,19 @@ function GameScreen({ selectedMode, onRestart }) {
     }
   };
 
-
   // 3. ZAMANLAYICI
   useEffect(() => {
     if (selectedMode === 'SURELI') {
       if (timeLeft <= 0) {
-        alert("Süre Doldu!"); 
-        onRestart(); 
+        // Süre doldu -> Yanlış sayılır
+        onRoundFinish(false); 
+        startNewRound();
         return;
       }
       const timer = setInterval(() => setTimeLeft(t => t - 1), 1000);
       return () => clearInterval(timer);
     }
-  }, [selectedMode, timeLeft, onRestart]);
+  }, [selectedMode, timeLeft, onRoundFinish]); 
 
 
   // 4. GÖRÜNÜM
@@ -113,23 +116,23 @@ function GameScreen({ selectedMode, onRestart }) {
         <h3>Mod: {selectedMode === 'KLASIK' ? 'Klasik' : selectedMode === 'SURELI' ? 'Zamana Karşı' : 'İpucusuz'}</h3>
 
         {selectedMode === 'SURELI' && (
-          <h2 style={{ color: timeLeft <= 5 ? 'crimson' : 'inherit' }}>{timeLeft}</h2>
+          <h2 style={{ color: timeLeft <= 5 ? 'crimson' : 'red' }}>{timeLeft}</h2>
         )}
 
-        {/* Mesajlar */}
-        {feedback === 'correct' && <h2 style={{color: 'green'}}>✅ TEBRİKLER!</h2>}
-        {feedback === 'wrong' && <h2 style={{color: 'crimson'}}>❌ YANLIŞ.</h2>}
+        {/* MESAJLAR */}
+        {feedback === 'correct' && <h2 style={{color: 'green'}}>✅ DOĞRU! +10 PUAN</h2>}
+        {feedback === 'wrong' && <h2 style={{color: 'crimson'}}>❌ YANLIŞ CEVAP.</h2>}
         
-        {/* İPUCU KUTUSU (Dinamik İpucu) */}
+        {/* İPUCU KUTUSU */}
         {feedback === 'hint' && (
           <div style={{backgroundColor: '#fff3cd', padding: '15px', borderRadius: '8px', border: '1px solid #ffeeba', color: '#856404'}}>
-            <strong>⚠️ YANLIŞ CEVAP! İPUCU:</strong>
+            <strong>⚠️ YANLIŞ! İPUCU:</strong>
             <p style={{margin: '5px 0', fontStyle:'italic'}}>"{currentHint}"</p>
             <small>Kalan resimlerden tekrar dene.</small>
           </div>
         )}
 
-        {!feedback && <p>Dikkatli bak ! Hangisi yapay zeka ürünü ?</p>}
+        {!feedback && <p>Dikkatli bak! Hangisi yapay zeka?</p>}
       </div>
       
       <div className="image-selection-area">

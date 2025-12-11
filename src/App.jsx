@@ -1,43 +1,80 @@
 import React, { useState } from 'react';
+import './App.css';
 import StartScreen from './components/StartScreen';
 import GameScreen from './components/GameScreen';
-
-import './App.css'; 
+import ResultScreen from './components/ResultScreen'; // Yeni ekranımızı çağırdık
 
 function App() {
-  
-  // 1. Component referansını state'te tutar
-  const [ActiveComponent, setActiveComponent] = useState(() => StartScreen);
-
-  // 2. Yeni ekleme: Hangi modun seçildiğini tutacak state.
+  // DURUMLAR (STATES)
+  const [activeScreen, setActiveScreen] = useState('START'); // START, GAME, RESULT
   const [selectedMode, setSelectedMode] = useState(null);
+  
+  const [score, setScore] = useState(0);       // Puanımız
+  const [rounds, setRounds] = useState(0);     // Kaçıncı turdayız?
+  
+  const TOTAL_ROUNDS = 10;
 
-  // 3. Güncellenen fonksiyon: Artık bu fonksiyon "modu" parametre olarak alıyor.
+  // 1. MOD SEÇİLİNCE OYUNU BAŞLATIR
   const handleModeSelect = (mode) => {
-    setSelectedMode(mode); // Hangi modun seçildiğini kaydeder
-    setActiveComponent(() => GameScreen); // Oyun ekranına geçer
+    setSelectedMode(mode);
+    setScore(0);   // Puanı sıfırlar
+    setRounds(0);  // Turu sıfırlar
+    setActiveScreen('GAME'); // Oyun ekranına geçer
   };
 
-  // Oyunu yeniden başlatan fonksiyon (İleride ResultScreen için)
-  const showStartScreen = () => {
-    setSelectedMode(null); // Mod seçimini sıfırlar
-    setActiveComponent(() => StartScreen); // Başlangıç ekranına döner
+  // 2. HER TUR BİTTİĞİNDE ÇALIŞACAK FONKSİYON
+  const handleRoundFinish = (isCorrect) => {
+    // Eğer doğru bildiyse 10 puan ekler
+    if (isCorrect) {
+      setScore((prevScore) => prevScore + 10);
+    }
+    
+    // Tur sayısını 1 arttırır
+    const nextRound = rounds + 1;
+    setRounds(nextRound);
+
+    // Eğer 10. tura geldiysek oyunu bitirir
+    if (nextRound >= TOTAL_ROUNDS) {
+      setActiveScreen('RESULT'); // Sonuç ekranına geçer
+    }
   };
 
-  // 4. Render (çizim):
+  // 3. OYUNU YENİDEN BAŞLATIR
+  const handleRestart = () => {
+    setActiveScreen('START');
+    setSelectedMode(null);
+    setScore(0);
+    setRounds(0);
+  };
+
   return (
     <div className="App-container">
-      <ActiveComponent 
-        // Gerekli tüm fonksiyonları ve verileri props olarak tek seferde iletiyoruz.
-        // StartScreen 'onModeSelect'i kullanacak.
-        onModeSelect={handleModeSelect} 
-        
-        // GameScreen 'selectedMode'u ve 'onRestart'ı kullanacak.
-        selectedMode={selectedMode} 
-        onRestart={showStartScreen} 
-      />
+      
+      {/* GİRİŞ EKRANI */}
+      {activeScreen === 'START' && (
+        <StartScreen onModeSelect={handleModeSelect} />
+      )}
+
+      {/* OYUN EKRANI */}
+      {activeScreen === 'GAME' && (
+        <GameScreen 
+          selectedMode={selectedMode} 
+          onRestart={handleRestart}
+          onRoundFinish={handleRoundFinish} // <--- Bu fonksiyonu GameScreen'e gönderiyoruz
+        />
+      )}
+
+      {/* SONUÇ EKRANI */}
+      {activeScreen === 'RESULT' && (
+        <ResultScreen 
+          score={score} 
+          totalRounds={TOTAL_ROUNDS} 
+          onRestart={handleRestart} 
+        />
+      )}
+      
     </div>
   );
-} 
+}
 
 export default App;
