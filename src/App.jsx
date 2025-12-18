@@ -2,19 +2,19 @@ import React, { useState } from 'react';
 import './App.css';
 import StartScreen from './components/StartScreen';
 import GameScreen from './components/GameScreen';
-import ResultScreen from './components/ResultScreen'; // Yeni ekranımızı çağırdık
+import ResultScreen from './components/ResultScreen';
 
 function App() {
   // DURUMLAR (STATES)
-  const [activeScreen, setActiveScreen] = useState('START'); // START, GAME, RESULT
+  const [activeScreen, setActiveScreen] = useState('START');
   const [selectedMode, setSelectedMode] = useState(null);
   
   const [score, setScore] = useState(0);       // Puanımız
   const [rounds, setRounds] = useState(0);     // Kaçıncı turdayız?
   
-  const TOTAL_ROUNDS = 10;
+  const TOTAL_ROUNDS = 10; 
 
-  // 1. MOD SEÇİLİNCE OYUNU BAŞLATIR
+  // 1. MOD SEÇİLİNCE OYUNU BAŞLAT
   const handleModeSelect = (mode) => {
     setSelectedMode(mode);
     setScore(0);   // Puanı sıfırlar
@@ -39,7 +39,7 @@ function App() {
     }
   };
 
-  // 3. OYUNU YENİDEN BAŞLATIR
+  // 3. OYUNU YENİDEN BAŞLAT
   const handleRestart = () => {
     setActiveScreen('START');
     setSelectedMode(null);
@@ -58,9 +58,13 @@ function App() {
       {/* OYUN EKRANI */}
       {activeScreen === 'GAME' && (
         <GameScreen 
+          key={rounds} 
+          
           selectedMode={selectedMode} 
           onRestart={handleRestart}
-          onRoundFinish={handleRoundFinish} // <--- Bu fonksiyonu GameScreen'e gönderiyoruz
+          onRoundFinish={handleRoundFinish} // Tur bitince App'e haber verir
+          currentRound={rounds + 1}         // Ekrana yazdırmak için (Örn: 1)
+          totalRounds={TOTAL_ROUNDS}        // Toplam tur (10)
         />
       )}
 

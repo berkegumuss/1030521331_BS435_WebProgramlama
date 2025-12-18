@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { realImages, aiImages } from '../data';
 
-// GENEL İPUCU HAVUZU
 const HINTS = [
   "Resimdeki nesnelerin dokuları ve yüzeyleri doğal mı?",
   "Işık ve gölge yönleri mantıklı görünüyor mu?",
@@ -13,105 +12,95 @@ const HINTS = [
   "Görseldeki ince detaylarda (çizgiler, desenler) tutarsızlık var mı?"
 ];
 
-// onRoundFinish özelliği eklendi
-function GameScreen({ selectedMode, onRestart, onRoundFinish }) {
+// 👇 'currentRound' ve 'totalRounds' özellikleri buraya eklendi
+function GameScreen({ selectedMode, onRestart, onRoundFinish, currentRound, totalRounds }) {
   
   const [timeLeft, setTimeLeft] = useState(15);
   const [currentImages, setCurrentImages] = useState([]);
   const [currentHint, setCurrentHint] = useState("");
-
   const [feedback, setFeedback] = useState(null); 
   const [selectedImageId, setSelectedImageId] = useState(null); 
   const [attempts, setAttempts] = useState(1); 
   const [eliminatedId, setEliminatedId] = useState(null); 
 
-  // 1. YENİ TUR HAZIRLIĞI
   const startNewRound = () => {
     setFeedback(null);
     setSelectedImageId(null);
     setEliminatedId(null);
     setAttempts(1);
-
     if (selectedMode === 'SURELI') setTimeLeft(15);
 
-    // Rastgele İpucu Seçer
     const randomHint = HINTS[Math.floor(Math.random() * HINTS.length)];
     setCurrentHint(randomHint);
 
-    // Rastgele Resimler Seçer
     const randomAI = aiImages[Math.floor(Math.random() * aiImages.length)];
     const shuffledReal = [...realImages].sort(() => 0.5 - Math.random());
     const selectedReal = shuffledReal.slice(0, 2);
-
     const combined = [randomAI, ...selectedReal].sort(() => 0.5 - Math.random());
     setCurrentImages(combined);
   };
 
   useEffect(() => {
     startNewRound();
-  }, []);
+  }, [currentRound]); // Her tur sayısı değiştiğinde yeni resimler gelir
 
-
-  // 2. TIKLAMA MANTIĞI
   const handleImageClick = (image) => {
     if (feedback === 'correct' || feedback === 'wrong') return; 
     if (image.id === eliminatedId) return; 
 
     setSelectedImageId(image.id);
 
-    // SENARYO A: DOĞRU CEVAP (AI)
     if (image.isAI) {
       setFeedback('correct');
       setTimeout(() => {
-        // App.jsx'e haber verir: "Doğru bildi (+10 Puan)"
         onRoundFinish(true); 
-        startNewRound();
       }, 1500);
-    } 
-    
-    // SENARYO B: YANLIŞ CEVAP 
-    else {
-      // Eğer mod "İPUCUSUZ" ise veya zaten 2. denemeyse -> KAYBETTİN
+    } else {
       if (selectedMode === 'IPUCUSUZ' || attempts === 2) {
         setFeedback('wrong');
         setTimeout(() => {
-          // App.jsx'e haber verir: "Bilemedi (0 Puan)"
           onRoundFinish(false);
-          startNewRound(); 
         }, 1500);
-      } 
-      
-      // Eğer "KLASIK" veya "SURELI" ise ve ilk denememse -> İPUCU VER
-      else {
+      } else {
         setFeedback('hint'); 
         setEliminatedId(image.id); 
         setAttempts(2); 
-        
-        setTimeout(() => {
-           setSelectedImageId(null); 
-        }, 1500);
+        setTimeout(() => setSelectedImageId(null), 1500);
       }
     }
   };
 
-  // 3. ZAMANLAYICI
   useEffect(() => {
     if (selectedMode === 'SURELI') {
       if (timeLeft <= 0) {
-        // Süre doldu -> Yanlış sayılır
         onRoundFinish(false); 
-        startNewRound();
         return;
       }
       const timer = setInterval(() => setTimeLeft(t => t - 1), 1000);
       return () => clearInterval(timer);
     }
-  }, [selectedMode, timeLeft, onRoundFinish]); 
+  }, [selectedMode, timeLeft, onRoundFinish]);
 
-
-  // 4. GÖRÜNÜM
   return (
-    <main className="game-area">
+    <main className="game-area" style={{ position: 'relative' }}>
+      
+      {/* SAYAÇ */}
+      <div style={{
+        position: 'absolute',
+        top: '15px',
+        right: '20px',
+        background: '#ecf0f1',
+        color: '#7f8c8d',
+        padding: '5px 15px',
+        borderRadius: '20px',
+        fontWeight: 'bold',
+        fontSize: '0.9rem',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+      }}>
+        Soru: {currentRound} / {totalRounds}
+      </div>
+      {/* SAYAÇ BİTTİ */}
+
       <div className="game-info">
         <h3>Mod: {selectedMode === 'KLASIK' ? 'Klasik' : selectedMode === 'SURELI' ? 'Zamana Karşı' : 'İpucusuz'}</h3>
 
@@ -119,11 +108,9 @@ function GameScreen({ selectedMode, onRestart, onRoundFinish }) {
           <h2 style={{ color: timeLeft <= 5 ? 'crimson' : 'red' }}>{timeLeft}</h2>
         )}
 
-        {/* MESAJLAR */}
         {feedback === 'correct' && <h2 style={{color: 'green'}}>✅ DOĞRU! +10 PUAN</h2>}
         {feedback === 'wrong' && <h2 style={{color: 'crimson'}}>❌ YANLIŞ CEVAP.</h2>}
         
-        {/* İPUCU KUTUSU */}
         {feedback === 'hint' && (
           <div style={{backgroundColor: '#fff3cd', padding: '15px', borderRadius: '8px', border: '1px solid #ffeeba', color: '#856404'}}>
             <strong>⚠️ YANLIŞ! İPUCU:</strong>
@@ -137,7 +124,6 @@ function GameScreen({ selectedMode, onRestart, onRoundFinish }) {
       
       <div className="image-selection-area">
         {currentImages.map((image) => {
-          
           let borderStyle = '3px solid lightgray'; 
           let opacityValue = 1;
 
@@ -145,7 +131,6 @@ function GameScreen({ selectedMode, onRestart, onRoundFinish }) {
             opacityValue = 0.3;
             borderStyle = '3px solid #ccc';
           }
-
           if (feedback === 'wrong' && image.id === selectedImageId) borderStyle = '4px solid crimson';
           if (feedback === 'correct' && image.id === selectedImageId) borderStyle = '4px solid green';
           if (feedback === 'hint' && image.id === selectedImageId) borderStyle = '4px solid crimson';
@@ -169,7 +154,6 @@ function GameScreen({ selectedMode, onRestart, onRoundFinish }) {
           );
         })}
       </div>
-
       <button onClick={onRestart}>Ana Menüye Dön</button>
     </main>
   );
