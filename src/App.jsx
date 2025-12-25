@@ -9,12 +9,18 @@ function App() {
   const [activeScreen, setActiveScreen] = useState('START');
   const [selectedMode, setSelectedMode] = useState(null);
   
-  const [score, setScore] = useState(0);       // Puanımız
+  const [score, setScore] = useState(0);// Puanımız
   const [rounds, setRounds] = useState(0);     // Kaçıncı turdayız?
+
+  //  Rekor puan için eklenen kısım
+  const [highScore, setHighScore] = useState(() => {
+    const savedScore = localStorage.getItem('highScore');
+    return savedScore ? parseInt(savedScore, 10) : 0;
+  });
   
   const TOTAL_ROUNDS = 10; 
 
-  // 1. MOD SEÇİLİNCE OYUNU BAŞLAT
+  // 1. MOD SEÇİLİNCE OYUNU BAŞLATIR
   const handleModeSelect = (mode) => {
     setSelectedMode(mode);
     setScore(0);   // Puanı sıfırlar
@@ -22,24 +28,31 @@ function App() {
     setActiveScreen('GAME'); // Oyun ekranına geçer
   };
 
-  // 2. HER TUR BİTTİĞİNDE ÇALIŞACAK FONKSİYON
+  // 2. ekleme
   const handleRoundFinish = (isCorrect) => {
-    // Eğer doğru bildiyse 10 puan ekler
+    // 1. State güncellenmeden puan hesaplanır
+    let newScore = score;
     if (isCorrect) {
-      setScore((prevScore) => prevScore + 10);
+      newScore = score + 10;
+      setScore(newScore);
     }
     
-    // Tur sayısını 1 arttırır
+    // 2. Tur arttırılır
     const nextRound = rounds + 1;
     setRounds(nextRound);
 
-    // Eğer 10. tura geldiysek oyunu bitirir
+    // 3. Oyunun bitip bitmediğini kontrol eder
     if (nextRound >= TOTAL_ROUNDS) {
-      setActiveScreen('RESULT'); // Sonuç ekranına geçer
+      // Eğer rekor kırıldıysa kaydeder
+      if (newScore > highScore) {
+        setHighScore(newScore);
+        localStorage.setItem('highScore', newScore);
+      }
+      setActiveScreen('RESULT');
     }
   };
 
-  // 3. OYUNU YENİDEN BAŞLAT
+  // 3. OYUNU YENİDEN BAŞLATIR
   const handleRestart = () => {
     setActiveScreen('START');
     setSelectedMode(null);
@@ -52,7 +65,8 @@ function App() {
       
       {/* GİRİŞ EKRANI */}
       {activeScreen === 'START' && (
-        <StartScreen onModeSelect={handleModeSelect} />
+        <StartScreen onModeSelect={handleModeSelect}
+        highScore={highScore} />
       )}
 
       {/* OYUN EKRANI */}
@@ -63,8 +77,8 @@ function App() {
           selectedMode={selectedMode} 
           onRestart={handleRestart}
           onRoundFinish={handleRoundFinish} // Tur bitince App'e haber verir
-          currentRound={rounds + 1}         // Ekrana yazdırmak için (Örn: 1)
-          totalRounds={TOTAL_ROUNDS}        // Toplam tur (10)
+          currentRound={rounds + 1}   
+          totalRounds={TOTAL_ROUNDS}       
         />
       )}
 
@@ -74,6 +88,7 @@ function App() {
           score={score} 
           totalRounds={TOTAL_ROUNDS} 
           onRestart={handleRestart} 
+          highScore={highScore}
         />
       )}
       

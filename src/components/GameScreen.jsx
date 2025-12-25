@@ -12,7 +12,6 @@ const HINTS = [
   "Görseldeki ince detaylarda (çizgiler, desenler) tutarsızlık var mı?"
 ];
 
-// 👇 'currentRound' ve 'totalRounds' özellikleri buraya eklendi
 function GameScreen({ selectedMode, onRestart, onRoundFinish, currentRound, totalRounds }) {
   
   const [timeLeft, setTimeLeft] = useState(15);
@@ -42,7 +41,7 @@ function GameScreen({ selectedMode, onRestart, onRoundFinish, currentRound, tota
 
   useEffect(() => {
     startNewRound();
-  }, [currentRound]); // Her tur sayısı değiştiğinde yeni resimler gelir
+  }, [currentRound]); 
 
   const handleImageClick = (image) => {
     if (feedback === 'correct' || feedback === 'wrong') return; 
@@ -122,18 +121,39 @@ function GameScreen({ selectedMode, onRestart, onRoundFinish, currentRound, tota
         {!feedback && <p>Dikkatli bak! Hangisi yapay zeka?</p>}
       </div>
       
-      <div className="image-selection-area">
+    
+      <div className="image-selection-area" style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '20px',
+        flexWrap: 'wrap',
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '20px',                
+        padding: '30px',             
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.3)', 
+        marginTop: '20px',
+        marginBottom: '20px'
+      }}>
         {currentImages.map((image) => {
-          let borderStyle = '3px solid lightgray'; 
+          let borderStyle = '3px solid transparent';
           let opacityValue = 1;
 
           if (image.id === eliminatedId) {
             opacityValue = 0.3;
             borderStyle = '3px solid #ccc';
           }
+          // Hata veya Doğru durumunda çerçeve renkleri
           if (feedback === 'wrong' && image.id === selectedImageId) borderStyle = '4px solid crimson';
           if (feedback === 'correct' && image.id === selectedImageId) borderStyle = '4px solid green';
           if (feedback === 'hint' && image.id === selectedImageId) borderStyle = '4px solid crimson';
+
+          
+          if (!feedback && image.id !== eliminatedId) {
+             borderStyle = '3px solid rgba(255,255,255,0.3)';
+          }
 
           return (
             <img 
@@ -148,13 +168,17 @@ function GameScreen({ selectedMode, onRestart, onRoundFinish, currentRound, tota
                 cursor: (feedback === 'correct' || feedback === 'wrong' || image.id === eliminatedId) ? 'default' : 'pointer', 
                 border: borderStyle,
                 opacity: opacityValue,
-                transform: (image.id === selectedImageId) ? 'scale(1.05)' : 'scale(1)'
+                transform: (image.id === selectedImageId) ? 'scale(1.05)' : 'scale(1)',
+                transition: 'all 0.3s ease', // Animasyon yumuşatma
+                borderRadius: '10px', 
+                boxShadow: '0 4px 6px rgba(0,0,0,0.3)' 
               }} 
             />
           );
         })}
       </div>
-      <button onClick={onRestart}>Ana Menüye Dön</button>
+      
+      <button onClick={onRestart} style={{marginTop: '20px'}}>Ana Menüye Dön</button>
     </main>
   );
 }

@@ -1,15 +1,32 @@
 import React, { useState } from 'react';
 
-function StartScreen({ onModeSelect }) {
+function StartScreen({ onModeSelect, highScore }) {
   const [showModes, setShowModes] = useState(false);
 
   return (
     <div className="start-container">
       <header className="game-header">
         <h1>AI Tarafından Üretilen Görseli Bulma Oyunu</h1>
+        
+        
+        <div style={{
+          backgroundColor: '#f1c40f', 
+          color: '#2c3e50', 
+          padding: '8px 20px', 
+          borderRadius: '15px',
+          fontWeight: 'bold',
+          marginTop: '15px',
+          marginBottom: '30px', 
+          display: 'inline-block',
+          boxShadow: '0 4px 0 #d35400',
+          fontSize: '1rem'
+        }}>
+          🏆 En Yüksek Skor: {highScore}
+        </div>
+
       </header>
 
-      {/* AŞAMA 1: Bilgilendirme Ekranı */}
+      {/* 1. Bilgilendirme Ekranı */}
       {!showModes && (
         <>
           <section className="rules-section">
@@ -21,7 +38,6 @@ function StartScreen({ onModeSelect }) {
               <p>3. Amacınız AI tarafından üretilen görseli bulmaktır.</p>
               <p>4. Oyunu <strong>3 farklı modda</strong> oynayabilirsiniz:</p>
               
-              {/* --- EKSİK OLAN MOD AÇIKLAMALARI BURADA --- */}
               <ul style={{
                   backgroundColor: 'rgba(0,0,0,0.2)', 
                   padding: '15px 15px 15px 35px', 
@@ -40,7 +56,6 @@ function StartScreen({ onModeSelect }) {
                   <strong style={{color: 'lightskyblue'}}>İpucusuz Mod:</strong> Zorluk sevenlere. Yanlış bilirsen tur biter.
                 </li>
               </ul>
-              {}
             </div>
           </section>
 
@@ -55,7 +70,7 @@ function StartScreen({ onModeSelect }) {
         </>
       )}
 
-      {/* AŞAMA 2: Mod Seçim Ekranı */}
+      {/*2. Mod Seçim Ekranı*/ }
       {showModes && (
         <section className="mode-selection">
           <h3>Hangi modda oynamak istersiniz?</h3>
@@ -87,4 +102,5 @@ function StartScreen({ onModeSelect }) {
 }
 
 export default StartScreen;
+
 

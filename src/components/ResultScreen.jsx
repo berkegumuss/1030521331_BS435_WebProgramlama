@@ -1,71 +1,74 @@
 import React from 'react';
 
-function ResultScreen({ score, totalRounds, onRestart }) {
+// Props kısmına 'highScore' eklendi.
+function ResultScreen({ score, totalRounds, onRestart, highScore }) {
   
-  // Puan hesaplama (Her soru 10 puan)
-  const maxScore = totalRounds * 10;
-  const successRate = (score / maxScore) * 100;
-
-  // Başarı durumuna göre mesaj belirle
-  let message = "";
-  let messageColor = "";
-
-  if (successRate >= 80) {
-    message = "🔥 Mükemmel! Tam bir AI Avcısısın !";
-    messageColor = "green";
-  } else if (successRate >= 50) {
-    message = "👏 Gayet iyi! Çoğunu doğru bildin.";
-    messageColor = "orange";
-  } else {
-    message = "⚠️ Geliştirilebilir. Biraz daha dikkatli bakmalısın.";
-    messageColor = "red";
-  }
+  const isNewRecord = score === highScore && score > 0;
 
   return (
-    // 'game-area' sınıfını kullanarak oyun ekranıyla aynı beyaz kutu tasarımını alıyoruz
-    <div className="game-area" style={{ justifyContent: 'center', textAlign: 'center' }}>
+    <div className="result-container" style={{ textAlign: 'center', padding: '40px' }}>
       
-      <div style={{ marginBottom: '20px' }}>
-        <h1 style={{ color: '#2c3e50', margin: '0 0 10px 0', fontSize: '2.5rem' }}>OYUN BİTTİ!</h1>
-        <p style={{ color: 'gray', fontSize: '1.2rem' }}>Toplam Puanın:</p>
-      </div>
+      {/* REKOR KUTLAMASI */}
+      {isNewRecord && (
+        <div style={{
+          fontSize: '1.8rem', 
+          marginBottom:'20px', 
+          animation: 'pulse 1s infinite'
+        }}>
+          🎉 🌟 <strong style={{color:'gold', textShadow: '2px 2px 4px #000'}}>YENİ REKOR!</strong> 🌟 🎉
+        </div>
+      )}
 
-      <div style={{ 
-        backgroundColor: '#f8f9fa', 
-        padding: '30px', 
+      <h2 style={{ fontSize: '2.5rem', marginBottom: '20px' }}>🏁 OYUN BİTTİ</h2>
+      
+      <div className="score-box" style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0.1)', 
+        padding: '20px', 
         borderRadius: '15px', 
-        border: '3px solid lightgray',
-        width: '80%',
-        maxWidth: '400px'
+        display: 'inline-block',
+        marginBottom: '20px'
       }}>
-        {/* SKOR GÖSTERGESİ */}
-        <h2 style={{ fontSize: '4rem', margin: '10px 0', color: '#3498db' }}>
-          {score}
-          <span style={{ fontSize: '1.5rem', color: 'gray' }}> / {maxScore}</span>
-        </h2>
-        
-        <hr style={{ border: '0', borderTop: '1px solid #ddd', margin: '20px 0' }} />
-        
-        {/* MESAJ */}
-        <h3 style={{ color: messageColor, margin: '0' }}>{message}</h3>
+        <p style={{ margin: 0 }}>Toplam Puanın</p>
+        <h1 style={{ fontSize: '4rem', margin: '10px 0', color: '#4ecdc4' }}>{score}</h1>
       </div>
 
-      {/* TEKRAR OYNA BUTONU */}
-      <button 
-        onClick={onRestart} 
-        style={{ 
-          marginTop: '30px', 
-          backgroundColor: '#3498db', 
-          color: 'white', 
-          border: 'none',
-          padding: '15px 40px',
-          fontSize: '1.1rem',
-          borderRadius: '50px'
-        }}
-      >
-        🔄 Tekrar Oyna
-      </button>
+      <p style={{ fontSize: '1.2rem' }}>
+        Toplam <strong>{totalRounds}</strong> soruda performansın bu şekilde.
+      </p>
 
+      {/* REKOR HATIRLATMASI */}
+      {!isNewRecord && (
+        <div style={{
+          marginTop: '15px',
+          padding: '10px',
+          backgroundColor: '#f1c40f',
+          color: '#2c3e50',
+          display: 'inline-block',
+          borderRadius: '8px',
+          fontWeight: 'bold'
+        }}>
+          🏆 Hedeflenen Rekor: {highScore}
+        </div>
+      )}
+
+      <div style={{ marginTop: '40px' }}>
+        <button 
+          onClick={onRestart} 
+          className="restart-btn"
+          style={{
+            padding: '15px 40px',
+            fontSize: '1.2rem',
+            backgroundColor: '#ff6b6b',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50px',
+            cursor: 'pointer',
+            boxShadow: '0 4px 15px rgba(255, 107, 107, 0.4)'
+          }}
+        >
+          🔄 Tekrar Oyna
+        </button>
+      </div>
     </div>
   );
 }
